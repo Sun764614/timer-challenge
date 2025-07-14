@@ -143,7 +143,7 @@
 
   <div id="timerCircle">0.00</div>
 
-  <div id="currentSettings">현재 설정: 목표 10.0초, 허용 오차 0.1초</div>
+  <div id="currentSettings">현재 설정: 목표 10.0초, 허용 오차 ±0.1초</div>
 
   <div class="highlight">🎯 목표 시간 설정:</div>
   <div class="button-group" id="targetButtons"></div>
@@ -186,6 +186,7 @@
 
       // 목표 시간 버튼 활성 상태 업데이트
       document.querySelectorAll('#targetButtons button').forEach(btn => {
+        // parseFloat를 사용하여 텍스트 내용을 숫자로 변환 후 비교
         if (parseFloat(btn.textContent) === targetTime) {
           btn.classList.add('active');
         } else {
@@ -194,6 +195,7 @@
       });
       // 허용 오차 버튼 활성 상태 업데이트
       document.querySelectorAll('#toleranceButtons button').forEach(btn => {
+        // parseFloat를 사용하여 텍스트 내용을 숫자로 변환 후 비교
         if (parseFloat(btn.textContent) === tolerance) {
           btn.classList.add('active');
         } else {
@@ -291,14 +293,16 @@
         const diff = Math.abs(elapsed - targetTime);
 
         // 허용 오차 범위 내에 있는지 내림/올림으로 확인
-        // 목표 시간 - 허용 오차 <= 경과 시간 <= 목표 시간 + 허용 오차
-        const lowerBound = targetTime - tolerance;
-        const upperBound = targetTime + tolerance;
-
         // 경과 시간을 소수점 둘째 자리까지 정확하게 비교하기 위해 Math.round 사용
         const roundedElapsed = Math.round(elapsed * 100) / 100;
 
-        if (roundedElapsed >= lowerBound.toFixed(2) && roundedElapsed <= upperBound.toFixed(2)) {
+        // 목표 시간 - 허용 오차 (내림)
+        const lowerBound = Math.floor((targetTime - tolerance) * 100) / 100;
+        // 목표 시간 + 허용 오차 (올림)
+        const upperBound = Math.ceil((targetTime + tolerance) * 100) / 100;
+        
+        // 경과 시간이 하한선 <= 경과 시간 <= 상한선 인지 확인
+        if (roundedElapsed >= lowerBound && roundedElapsed <= upperBound) {
           resultEl.textContent = `🎉 성공! ${elapsed.toFixed(2)}초 (오차: ±${diff.toFixed(2)}초)`;
           resultEl.className = "success";
           timerEl.style.backgroundColor = '#d4edda'; /* 성공 시 연한 초록색 */
