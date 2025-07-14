@@ -3,389 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Timer Challenge for KY YH</title>
+  <title>KY YH 게임 메뉴</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
+      background-color: #f0f8ff;
       text-align: center;
-      background: #f0f8ff;
-      margin: 0;
-      padding: 20px;
-      display: flex; /* Flexbox 사용 */
-      flex-direction: column; /* 세로 방향 정렬 */
-      min-height: 100vh; /* 뷰포트 전체 높이 사용 */
-      justify-content: center; /* 세로 중앙 정렬 */
-      align-items: center; /* 가로 중앙 정렬 */
+      padding: 40px;
     }
     h1 {
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
-    #header {
-      font-size: 22px;
-      margin-bottom: 20px;
+      font-size: 26px;
       color: #4a90e2;
-      font-weight: bold;
+      margin-bottom: 30px;
     }
-    #timerCircle {
-      width: 300px;
-      height: 300px;
-      border: 6px solid #333;
-      border-radius: 50%;
-      margin: 20px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 60px;
-      background: white;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: background-color 0.3s ease; /* 배경색 변화 애니메이션 */
-    }
-    .button-group {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap; /* 작은 화면에서 버튼 줄바꿈 */
-      justify-content: center;
-      gap: 8px; /* 버튼 사이 간격 */
-    }
-    .button-group button {
-      font-size: 18px; /* 버튼 폰트 크기 조정 */
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: 2px solid #666;
-      background-color: #e0e0e0;
-      cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
-    .button-group button:hover {
-      background-color: #d0d0d0;
-    }
-    .button-group button.active { /* 활성 버튼 스타일 */
-      background-color: #4CAF50;
-      color: white;
-      border-color: #4CAF50;
-    }
-    .input-row { /* 입력 필드와 설정 버튼을 한 줄에 배치하기 위한 스타일 */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 10px; /* 상단 여백 */
-    }
-    input[type="number"] {
-      font-size: 18px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 2px solid #ccc;
-      width: 100px;
-      text-align: center;
-      margin-right: 5px; /* 버튼과의 간격 */
-    }
-    .highlight {
-      font-size: 20px; /* 폰트 크기 조정 */
-      margin-top: 25px;
+    .game-button {
+      display: inline-block;
+      background-color: #ffffff;
       color: #2c3e50;
-      font-weight: bold;
-    }
-    #result {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 30px;
-      min-height: 40px; /* 결과 표시 영역 최소 높이 */
-    }
-    .success {
-      color: #28a745; /* 더 진한 초록색 */
-    }
-    .fail {
-      color: #dc3545; /* 더 진한 빨간색 */
-    }
-    #controlButtons {
-      margin-top: 20px;
-    }
-    #controlButtons button {
-      font-size: 22px;
-      padding: 12px 28px;
-      margin: 0 10px;
-      border-radius: 10px;
-      border: 2px solid #333;
+      border: 3px solid #4a90e2;
+      border-radius: 16px;
+      padding: 20px 40px;
+      font-size: 24px;
+      margin: 20px;
       cursor: pointer;
-      background-color: #007bff;
+      transition: 0.2s;
+    }
+    .game-button:hover {
+      background-color: #4a90e2;
       color: white;
-      transition: background-color 0.2s;
-    }
-    #controlButtons button:hover {
-      background-color: #0056b3;
-    }
-    #currentSettings { /* 현재 설정 값 표시 스타일 */
-      margin-top: 20px;
-      font-size: 20px;
-      color: #555;
-      font-weight: bold;
-    }
-
-    /* -------------------- 모바일 반응형 최적화 -------------------- */
-    @media (max-width: 600px) { /* 화면 너비 600px 이하일 때 적용 */
-      body {
-        padding: 10px; /* 패딩 줄임 */
-      }
-      #header {
-        font-size: 18px; /* 헤더 폰트 크기 줄임 */
-        margin-bottom: 15px;
-      }
-      #timerCircle {
-        width: 250px; /* 원 크기 줄임 */
-        height: 250px;
-        font-size: 50px; /* 원 내부 숫자 폰트 크기 줄임 */
-        margin: 15px auto;
-      }
-      .button-group {
-        gap: 6px; /* 버튼 간격 줄임 */
-      }
-      .button-group button {
-        font-size: 16px; /* 버튼 폰트 크기 줄임 */
-        padding: 8px 15px; /* 버튼 패딩 줄임 */
-      }
-      .input-row button, .input-row input { /* 직접 입력 설정 버튼과 입력창 */
-        font-size: 16px;
-        padding: 6px 10px;
-        width: 80px; /* 입력창 너비 줄임 */
-      }
-      .highlight {
-        font-size: 18px; /* 강조 텍스트 폰트 크기 줄임 */
-        margin-top: 20px;
-      }
-      #result {
-        font-size: 24px; /* 결과 폰트 크기 줄임 */
-        margin-top: 25px;
-      }
-      #controlButtons button {
-        font-size: 18px; /* 제어 버튼 폰트 크기 줄임 */
-        padding: 10px 20px;
-        margin: 0 5px; /* 제어 버튼 간격 줄임 */
-      }
-      #currentSettings {
-        font-size: 16px; /* 현재 설정 폰트 크기 줄임 */
-        margin-top: 15px;
-      }
     }
   </style>
 </head>
 <body>
-  <div id="header">KY YH를 위하여 SG가 만들었어요</div>
+  <h1>🎮 KY YH를 위하여 SG가 만들었어요</h1>
 
-  <div id="timerCircle">0.00</div>
-
-  <div id="currentSettings">현재 설정: 목표 10.0초, 허용 오차 ±0.1초</div>
-
-  <div class="highlight">🎯 목표 시간 설정:</div>
-  <div class="button-group" id="targetButtons"></div>
-  <div class="input-row"> <input type="number" step="0.1" id="customTarget" placeholder="직접 입력">
-    <button onclick="setCustomTarget()">설정</button>
+  <div>
+    <a href="timer.html" class="game-button">⏱ 타이머 챌린지</a>
+    <a href="reaction.html" class="game-button">⚡ 반응속도 테스트</a>
   </div>
-
-  <div class="highlight">⏱ 허용 오차 설정:</div>
-  <div class="button-group" id="toleranceButtons"></div>
-  <div class="input-row"> <input type="number" step="0.1" id="customTolerance" placeholder="직접 입력">
-    <button onclick="setCustomTolerance()">설정</button>
-  </div>
-
-  <div id="controlButtons">
-    <button id="startButton" onclick="startTimer()">시작</button>
-    <button id="stopButton" onclick="stopTimer()" disabled>정지</button>
-    <button id="resetButton" onclick="resetTimer()">초기화</button>
-  </div>
-
-  <div id="result">시작 버튼을 누르면 시작</div>
-
-  <script>
-    let targetTime = 10.0;
-    let tolerance = 0.1;
-    let startTime = null;
-    let timerRunning = false;
-    let animationFrameId = null; // requestAnimationFrame ID 저장
-    const timerEl = document.getElementById("timerCircle");
-    const resultEl = document.getElementById("result");
-    const currentSettingsEl = document.getElementById("currentSettings"); // 현재 설정 엘리먼트
-    const startButton = document.getElementById("startButton");
-    const stopButton = document.getElementById("stopButton");
-    const resetButton = document.getElementById("resetButton");
-
-    const targetButtonsValues = [5, 10, 15, 20];
-    const toleranceButtonsValues = [0.1, 0.2, 0.3, 0.4, 0.5];
-
-    // UI 업데이트 함수 (현재 설정 값 표시 및 버튼 활성/비활성, active 클래스 관리)
-    function updateUI() {
-      // 현재 설정 표시
-      currentSettingsEl.textContent = `현재 설정: 목표 ${targetTime.toFixed(1)}초, 허용 오차 ±${tolerance.toFixed(1)}초`;
-
-      // 목표 시간 버튼 활성 상태 업데이트
-      document.querySelectorAll('#targetButtons button').forEach(btn => {
-        if (parseFloat(btn.textContent) === targetTime) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-      // 허용 오차 버튼 활성 상태 업데이트
-      document.querySelectorAll('#toleranceButtons button').forEach(btn => {
-        if (parseFloat(btn.textContent) === tolerance) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
-      // 버튼 활성화/비활성화 상태
-      startButton.disabled = timerRunning;
-      stopButton.disabled = !timerRunning;
-      resetButton.disabled = timerRunning; // 타이머 실행 중에는 초기화 불가
-    }
-
-    // 버튼 생성 함수
-    function createButtons() {
-      const targetContainer = document.getElementById("targetButtons");
-      targetButtonsValues.forEach(sec => {
-        const btn = document.createElement("button");
-        btn.textContent = sec + '초';
-        btn.onclick = () => {
-          targetTime = sec;
-          updateUI(); // 값 변경 후 UI 업데이트 호출
-        };
-        targetContainer.appendChild(btn);
-      });
-
-      const tolContainer = document.getElementById("toleranceButtons");
-      toleranceButtonsValues.forEach(tol => {
-        const btn = document.createElement("button");
-        btn.textContent = tol.toFixed(1); // 소수점 한 자리로 통일
-        btn.onclick = () => {
-          tolerance = tol;
-          updateUI(); // 값 변경 후 UI 업데이트 호출
-        };
-        tolContainer.appendChild(btn);
-      });
-      updateUI(); // 초기 UI 업데이트
-    }
-
-    // 직접 입력 목표 시간 설정
-    function setCustomTarget() {
-      const val = parseFloat(document.getElementById("customTarget").value);
-      if (!isNaN(val) && val > 0) { // 0보다 큰 값만 허용
-        targetTime = val;
-        updateUI();
-      } else {
-        alert("유효한 목표 시간을 입력해주세요 (0보다 큰 숫자).");
-      }
-    }
-
-    // 직접 입력 허용 오차 설정
-    function setCustomTolerance() {
-      const val = parseFloat(document.getElementById("customTolerance").value);
-      if (!isNaN(val) && val >= 0) { // 0 또는 양수 허용
-        tolerance = val;
-        updateUI();
-      } else {
-        alert("유효한 허용 오차를 입력해주세요 (0 또는 양수).");
-      }
-    }
-
-    // 타이머 업데이트 (애니메이션 프레임 기반)
-    function updateTimer() {
-      if (timerRunning) {
-        const now = performance.now();
-        const elapsed = (now - startTime) / 1000;
-        timerEl.textContent = elapsed.toFixed(2);
-        animationFrameId = requestAnimationFrame(updateTimer);
-      }
-    }
-
-    // 타이머 시작
-    function startTimer() {
-      if (!timerRunning) {
-        resultEl.textContent = "...측정 중...";
-        resultEl.className = "";
-        timerEl.style.backgroundColor = 'white'; // 시작 시 흰색
-        startTime = performance.now();
-        timerRunning = true;
-        updateTimer();
-        updateUI(); // 버튼 상태 업데이트
-      }
-    }
-
-    // 타이머 정지 및 결과 계산
-    function stopTimer() {
-      if (timerRunning) {
-        cancelAnimationFrame(animationFrameId); // 애니메이션 프레임 중단
-        timerRunning = false;
-        const endTime = performance.now();
-        const elapsed = (endTime - startTime) / 1000;
-        timerEl.textContent = elapsed.toFixed(2); // 최종 시간 표시
-
-        // 오차 계산: 절대 오차
-        const diff = Math.abs(elapsed - targetTime);
-
-        // 허용 오차 범위 내에 있는지 내림/올림으로 확인
-        // 경과 시간을 소수점 둘째 자리까지 정확하게 비교하기 위해 Math.round 사용
-        const roundedElapsed = Math.round(elapsed * 100) / 100;
-
-        // 목표 시간 - 허용 오차 (내림)
-        const lowerBound = Math.floor((targetTime - tolerance) * 100) / 100;
-        // 목표 시간 + 허용 오차 (올림)
-        const upperBound = Math.ceil((targetTime + tolerance) * 100) / 100;
-        
-        // 경과 시간이 하한선 <= 경과 시간 <= 상한선 인지 확인
-        if (roundedElapsed >= lowerBound && roundedElapsed <= upperBound) {
-          resultEl.textContent = `🎉 성공! ${elapsed.toFixed(2)}초 (오차: ±${diff.toFixed(2)}초)`;
-          resultEl.className = "success";
-          timerEl.style.backgroundColor = '#d4edda'; /* 성공 시 연한 초록색 */
-        } else {
-          resultEl.textContent = `😢 실패! ${elapsed.toFixed(2)}초 (오차: ±${diff.toFixed(2)}초)`;
-          resultEl.className = "fail";
-          timerEl.style.backgroundColor = '#f8d7da'; /* 실패 시 연한 빨간색 */
-        }
-        updateUI(); // 버튼 상태 업데이트
-      }
-    }
-
-    // 타이머 초기화
-    function resetTimer() {
-      cancelAnimationFrame(animationFrameId); // 혹시 모를 실행 중인 애니메이션 중단
-      timerRunning = false;
-      startTime = null;
-      timerEl.textContent = "0.00";
-      resultEl.textContent = "시작 버튼을 누르면 시작";
-      resultEl.className = "";
-      timerEl.style.backgroundColor = 'white'; // 초기화 시 흰색
-      updateUI(); // 버튼 상태 업데이트
-    }
-
-    // 키보드 이벤트 (스페이스바로 시작/정지, R키로 초기화 유지)
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        e.preventDefault(); // 스페이스바 스크롤 방지
-        if (!timerRunning) {
-          startTimer();
-        } else {
-          stopTimer();
-        }
-      } else if (e.key === "r" || e.key === "R") {
-        resetTimer();
-      }
-    });
-
-    // 터치 이벤트 (모바일: 버튼 외 영역 터치 시 시작/정지)
-    document.addEventListener("touchstart", (e) => {
-      // 터치 이벤트가 버튼이나 입력창에서 발생한 것이 아니라면 (오작동 방지)
-      if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-        if (!timerRunning) {
-          startTimer();
-        } else {
-          stopTimer();
-        }
-      }
-    });
-
-    // 초기 설정
-    createButtons();
-  </script>
 </body>
 </html>
