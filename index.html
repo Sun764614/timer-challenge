@@ -1,45 +1,77 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KY YH 게임 메뉴</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f0f8ff;
-      text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      font-size: 26px;
-      color: #4a90e2;
-      margin-bottom: 30px;
-    }
-    .game-button {
-      display: inline-block;
-      background-color: #ffffff;
-      color: #2c3e50;
-      border: 3px solid #4a90e2;
-      border-radius: 16px;
-      padding: 20px 40px;
-      font-size: 24px;
-      margin: 20px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .game-button:hover {
-      background-color: #4a90e2;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이들을 위한 게임 선택</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: #e6f2ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 3em; /* 더 크게 */
+        }
+        .game-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 80%; /* 가로 너비 제한 */
+            max-width: 500px; /* 최대 너비 */
+        }
+        .game-button {
+            display: block;
+            padding: 25px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 2.5em; /* 더 크게 */
+            font-weight: bold;
+            border-radius: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        .game-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-5px); /* 호버 시 약간 위로 */
+        }
+        .game-button:active {
+            transform: translateY(0); /* 클릭 시 원위치 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+                margin-bottom: 20px;
+            }
+            .game-button {
+                font-size: 1.8em;
+                padding: 20px;
+            }
+            .game-selection {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🎮 KY YH를 위하여 SG가 만들었어요</h1>
-
-  <div>
-    <a href="timer.html" class="game-button">⏱ 타이머 챌린지</a>
-    <a href="reaction.html" class="game-button">⚡ 반응속도 테스트</a>
-  </div>
+    <h1>🎮 재미있는 게임 선택! 🚀</h1>
+    <div class="game-selection">
+        <a href="timer_challenge.html" class="game-button">⏱️ 타이머 챌린지</a>
+        <a href="reaction_test.html" class="game-button">⚡ 반응 속도 테스트</a>
+        </div>
 </body>
 </html>
