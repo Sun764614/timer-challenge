@@ -66,7 +66,8 @@
             font-weight: bold;
             color: #34495e; /* 진한 회색 */
             margin-bottom: 20px;
-            min-height: 1.5em; /* 결과 표시 영역 높이 유지 */
+            min-height: 2em; /* 결과 표시 영역 높이 약간 증가 */
+            white-space: pre-line; /* 여러 줄 공백 유지 */
         }
         #scoreDisplay {
             font-size: 1.5em;
@@ -167,19 +168,20 @@
             const computerChoice = choices[Math.floor(Math.random() * choices.length)];
             const winner = determineWinner(playerChoice, computerChoice);
 
+            // 결과 텍스트를 줄바꿈하여 생성
             let resultText = `나 ${choiceEmojis[playerChoice]} vs ${choiceEmojis[computerChoice]} 컴퓨터 `;
 
             if (winner === 'player') {
-                resultText += '➡️ 내가 이겼어요! 🎉';
+                resultText += '<br>➡️ 내가 이겼어요! 🎉';
                 playerScore++;
             } else if (winner === 'computer') {
-                resultText += '➡️ 컴퓨터가 이겼어요! 😢';
+                resultText += '<br>➡️ 컴퓨터가 이겼어요! 😢';
                 computerScore++;
             } else {
-                resultText += '➡️ 비겼어요! 🤝';
+                resultText += '<br>➡️ 비겼어요! 🤝';
             }
 
-            resultDisplay.textContent = resultText;
+            resultDisplay.innerHTML = resultText; // innerHTML을 사용하여 <br> 태그 적용
             updateScore();
         }
 
