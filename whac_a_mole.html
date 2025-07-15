@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두더지 잡기 게임</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: #e0f7fa; /* 연한 하늘색 배경 */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden; /* 스크롤 방지 */
+        }
+        h1 {
+            color: #00796b; /* 진한 청록색 */
+            font-size: 2.8em;
+            margin-bottom: 20px;
+        }
+        #scoreDisplay {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #004d40;
+            margin-bottom: 20px;
+        }
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3x3 격자 */
+            grid-gap: 15px;
+            width: 330px; /* 3 * 100px + 2 * 15px */
+            height: 330px; /* 3 * 100px + 2 * 15px */
+            background-color: #8d6e63; /* 갈색 땅 */
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .hole {
+            width: 100px;
+            height: 100px;
+            background-color: #a1887f; /* 약간 밝은 갈색 구멍 */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* 두더지가 튀어나올 때 경계선 넘지 않게 */
+            position: relative; /* 두더지 위치 지정을 위해 */
+        }
+        .mole {
+            width: 90px;
+            height: 90px;
+            background-color: #4CAF50; /* 초록색 두더지 */
+            border-radius: 50%;
+            position: absolute;
+            bottom: -100%; /* 초기에는 숨겨진 상태 */
+            transition: bottom 0.1s ease-out; /* 부드럽게 나타나고 사라지는 애니메이션 */
+            font-size: 3em; /* 두더지 이모티콘 크기 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .mole.up {
+            bottom: 5px; /* 나타났을 때 위치 */
+        }
+        .hit {
+            background-color: #ff5252; /* 맞췄을 때 빨간색 */
+        }
+        #message {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #c2185b; /* 진한 빨간색 */
+            min-height: 1.5em;
+            margin-bottom: 20px;
+        }
+        #startButton, #backButton {
+            padding: 12px 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 10px 5px;
+        }
+        #startButton:hover, #backButton:hover {
+            background-color: #0056b3;
+        }
+        #startButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            #scoreDisplay {
+                font-size: 1.5em;
+            }
+            #gameBoard {
+                width: 270px; /* 3 * 80px + 2 * 15px */
+                height: 270px;
+                grid-gap: 10px;
+                padding: 10px;
+            }
+            .hole {
+                width: 80px;
+                height: 80px;
+            }
+            .mole {
+                width: 70px;
+                height: 70px;
+                font-size: 2.5em;
+            }
+            #message {
+                font-size: 1.2em;
+            }
+            #startButton, #backButton {
+                padding: 10px 20px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>💥 두더지 잡기 게임! 💥</h1>
+    <div id="scoreDisplay">점수: 0</div>
+    <div id="gameBoard">
+        </div>
+    <div id="message">게임 준비 완료! 시작 버튼을 누르세요.</div>
+    <button id="startButton">게임 시작</button>
+    <a href="index.html" id="backButton">메인으로</a>
+
+    <script>
+        const gameBoard = document.getElementById('gameBoard');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const messageDisplay = document.getElementById('message');
+        const startButton = document.getElementById('startButton');
+
+        let score = 0;
+        let gameActive = false;
+        let currentMole = null; // 현재 나타난 두더지 요소
+        let timerId = null; // 두더지 나타나고 사라지는 타이머
+        let gameTimerId = null; // 전체 게임 타이머
+        const gameDuration = 30000; // 게임 지속 시간 (30초)
+
+        // 구멍 생성
+        for (let i = 0; i < 9; i++) {
+            const hole = document.createElement('div');
+            hole.classList.add('hole');
+            hole.dataset.id = i; // 각 구멍에 고유 ID 부여
+
+            const mole = document.createElement('div');
+            mole.classList.add('mole');
+            mole.textContent = '🦔'; // 두더지 이모티콘
+            mole.addEventListener('click', () => whackMole(mole, i)); // 두더지 클릭 이벤트
+
+            hole.appendChild(mole);
+            gameBoard.appendChild(hole);
+        }
+
+        const moles = document.querySelectorAll('.mole');
+
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = `점수: ${score}`;
+        }
+
+        function randomHole() {
+            // 모든 두더지를 숨김
+            moles.forEach(mole => {
+                mole.classList.remove('up');
+                mole.classList.remove('hit');
+            });
+            
+            const randomIndex = Math.floor(Math.random() * moles.length);
+            currentMole = moles[randomIndex];
+            currentMole.classList.add('up'); // 두더지 나타남
+
+            // 두더지가 나타나는 시간 조절 (1초 ~ 1.5초 후 사라지도록)
+            const randomShowTime = Math.random() * 500 + 1000; // 1초에서 1.5초 사이
+            timerId = setTimeout(() => {
+                currentMole.classList.remove('up');
+                currentMole = null;
+                if (gameActive) { // 게임이 활성화된 경우에만 다음 두더지 준비
+                    moveMole();
+                }
+            }, randomShowTime);
+        }
+
+        function moveMole() {
+            timerId = null; // 기존 타이머 ID 초기화
+            randomHole();
+        }
+
+        function whackMole(mole, index) {
+            if (!gameActive || mole !== currentMole) { // 게임 비활성화 상태이거나 엉뚱한 두더지를 클릭한 경우
+                updateScore(-1); // 잘못 클릭하면 점수 감소
+                messageDisplay.textContent = '아쉽다! 😅';
+                messageDisplay.className = 'error';
+                setTimeout(() => messageDisplay.textContent = '', 500); // 메시지 0.5초 후 제거
+                return;
+            }
+
+            clearTimeout(timerId); // 두더지 자동 숨김 타이머 취소
+            mole.classList.remove('up');
+            mole.classList.add('hit'); // 맞았을 때 시각 효과
+            updateScore(1); // 점수 획득
+            messageDisplay.textContent = '히트! 👍';
+            messageDisplay.className = 'success';
+            setTimeout(() => {
+                messageDisplay.textContent = '';
+                messageDisplay.className = '';
+            }, 500); // 메시지 0.5초 후 제거
+
+            currentMole = null; // 현재 두더지 리셋
+            if (gameActive) { // 게임이 활성화된 경우에만 다음 두더지 준비
+                moveMole();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            updateScore(0);
+            gameActive = true;
+            startButton.disabled = true;
+            messageDisplay.textContent = '게임 시작!';
+            messageDisplay.className = '';
+
+            moveMole(); // 첫 두더지 등장
+
+            gameTimerId = setTimeout(() => {
+                endGame();
+            }, gameDuration);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearTimeout(timerId); // 마지막 두더지 타이머 정리
+            clearTimeout(gameTimerId); // 전체 게임 타이머 정리
+            moles.forEach(mole => mole.classList.remove('up', 'hit')); // 모든 두더지 숨김
+            currentMole = null;
+            messageDisplay.textContent = `게임 종료! 최종 점수: ${score}점`;
+            messageDisplay.className = score > 0 ? 'success' : 'error'; // 점수에 따라 메시지 색상 변경
+            startButton.disabled = false;
+        }
+
+        startButton.addEventListener('click', startGame);
+
+        // 초기 메시지 설정
+        messageDisplay.textContent = '게임 준비 완료! 시작 버튼을 누르세요.';
+    </script>
+</body>
+</html>
