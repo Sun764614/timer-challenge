@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숫자 맞추기 게임</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: #e6f7ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        #gameContainer {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        #message {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4a90e2;
+            min-height: 1.5em; /* 메시지 영역 높이 유지 */
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            width: 100px;
+            padding: 12px;
+            font-size: 1.5em;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #attempts {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 15px;
+        }
+        .success {
+            color: #28a745 !important;
+        }
+        .error {
+            color: #dc3545 !important;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            #gameContainer {
+                padding: 20px;
+            }
+            p {
+                font-size: 1em;
+            }
+            #message {
+                font-size: 1.5em;
+            }
+            input[type="number"] {
+                width: 80px;
+                padding: 10px;
+                font-size: 1.2em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1.2em;
+            }
+            #attempts {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>❓ 숫자 맞추기 게임!</h1>
+    <div id="gameContainer">
+        <p>저는 1부터 100까지의 숫자 중 하나를 생각하고 있어요.</p>
+        <p>제가 생각한 숫자를 맞춰보세요!</p>
+        <div id="message"></div>
+        <input type="number" id="guessInput" min="1" max="100" placeholder="숫자 입력" autofocus>
+        <button id="submitGuess">확인</button>
+        <button id="resetGame">다시 시작</button>
+        <p id="attempts">시도 횟수: 0</p>
+    </div>
+
+    <script>
+        let randomNumber;
+        let attempts = 0;
+        const guessInput = document.getElementById('guessInput');
+        const submitButton = document.getElementById('submitGuess');
+        const resetButton = document.getElementById('resetGame');
+        const messageDisplay = document.getElementById('message');
+        const attemptsDisplay = document.getElementById('attempts');
+
+        function initializeGame() {
+            randomNumber = Math.floor(Math.random() * 100) + 1; // 1부터 100까지의 숫자
+            attempts = 0;
+            messageDisplay.textContent = '숫자를 맞춰보세요!';
+            messageDisplay.className = ''; // 클래스 초기화
+            attemptsDisplay.textContent = `시도 횟수: ${attempts}`;
+            guessInput.value = '';
+            guessInput.disabled = false;
+            submitButton.disabled = false;
+            guessInput.focus(); // 입력 필드에 자동으로 포커스
+        }
+
+        function checkGuess() {
+            const userGuess = parseInt(guessInput.value);
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                messageDisplay.textContent = '1에서 100 사이의 유효한 숫자를 입력해주세요.';
+                messageDisplay.className = 'error';
+                return;
+            }
+
+            attempts++;
+            attemptsDisplay.textContent = `시도 횟수: ${attempts}`;
+
+            if (userGuess === randomNumber) {
+                messageDisplay.textContent = `🎉 축하해요! ${userGuess}가 정답입니다! ${attempts}번 만에 맞췄어요!`;
+                messageDisplay.className = 'success';
+                guessInput.disabled = true;
+                submitButton.disabled = true;
+            } else if (userGuess < randomNumber) {
+                messageDisplay.textContent = '⬆️ 더 높게!';
+                messageDisplay.className = '';
+            } else {
+                messageDisplay.textContent = '⬇️ 더 낮게!';
+                messageDisplay.className = '';
+            }
+            guessInput.value = ''; // 입력값 초기화
+            guessInput.focus(); // 다시 입력 필드에 포커스
+        }
+
+        submitButton.addEventListener('click', checkGuess);
+        resetButton.addEventListener('click', initializeGame);
+
+        // Enter 키로 숫자 확인
+        guessInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkGuess();
+            }
+        });
+
+        // 게임 초기화
+        initializeGame();
+    </script>
+</body>
+</html>
