@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반응 속도 테스트</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: #e6f2ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        #gameArea {
+            width: 90%;
+            max-width: 600px;
+            height: 400px;
+            background-color: #f0f0f0;
+            border: 5px solid #333;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            user-select: none; /* 텍스트 선택 방지 */
+            transition: background-color 0.1s ease;
+            margin-bottom: 20px;
+        }
+        #gameArea.waiting {
+            background-color: #f39c12; /* 주황색 */
+            color: white;
+        }
+        #gameArea.ready {
+            background-color: #28a745; /* 초록색 */
+            color: white;
+        }
+        #gameArea.started {
+            background-color: #dc3545; /* 빨간색 */
+            color: white;
+        }
+        #resultDisplay {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 20px;
+            min-height: 1.5em; /* 결과 표시 영역 높이 유지 */
+        }
+        #startButton {
+            padding: 15px 30px;
+            font-size: 1.8em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        #startButton:hover {
+            background-color: #0056b3;
+        }
+        #startButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            #gameArea {
+                height: 300px; /* 게임 영역 높이 줄임 */
+                font-size: 1.5em;
+            }
+            #resultDisplay {
+                font-size: 1.5em;
+            }
+            #startButton {
+                padding: 12px 25px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>⚡ 반응 속도 테스트 ⚡</h1>
+    <div id="gameArea">클릭하여 시작!</div>
+    <div id="resultDisplay"></div>
+    <button id="startButton">다시 시작</button>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const startButton = document.getElementById('startButton');
+
+        let timeoutId;
+        let startTime;
+        let waitingForClick = false; // 초록색 상태에서 클릭을 기다리는 중인지
+        let gameStarted = false; // 게임이 시작되었는지 (클릭 대기 전 단계)
+
+        function resetGame() {
+            clearTimeout(timeoutId);
+            gameArea.className = '';
+            gameArea.textContent = '클릭하여 시작!';
+            resultDisplay.textContent = '';
+            startButton.disabled = false;
+            waitingForClick = false;
+            gameStarted = false;
+        }
+
+        function startGame() {
+            resetGame(); // 게임 시작 전 초기화
+            startButton.disabled = true; // 시작 버튼 비활성화
+
+            gameArea.textContent = '기다려 주세요...';
+            gameArea.classList.add('waiting'); // 주황색
+
+            const randomTime = Math.random() * 2000 + 1000; // 1초 ~ 3초 랜덤 지연
+            timeoutId = setTimeout(() => {
+                gameArea.className = ''; // 기존 클래스 제거
+                gameArea.classList.add('ready'); // 초록색
+                gameArea.textContent = '클릭!';
+                startTime = performance.now(); // 초록색으로 변한 시간 기록
+                waitingForClick = true; // 클릭 대기 상태로 전환
+                gameStarted = true; // 게임 시작 완료 (초록색 상태)
+            }, randomTime);
+        }
+
+        function handleClick() {
+            if (!gameStarted && !waitingForClick) { // 아직 게임 시작 전 (클릭하여 시작)
+                startGame();
+            } else if (waitingForClick) { // 초록색일 때 클릭
+                const reactionTime = performance.now() - startTime;
+                resultDisplay.textContent = `반응 시간: ${reactionTime.toFixed(2)}ms`;
+                gameArea.className = '';
+                gameArea.textContent = '결과: ' + reactionTime.toFixed(0) + 'ms';
+                startButton.disabled = false; // 다시 시작 버튼 활성화
+                waitingForClick = false; // 클릭 대기 상태 해제
+                gameStarted = false; // 게임 종료
+            } else if (gameArea.classList.contains('waiting')) { // 주황색일 때 클릭 (너무 빠름)
+                clearTimeout(timeoutId); // 대기 타이머 취소
+                resultDisplay.textContent = '너무 일찍 클릭했어요! 😫';
+                gameArea.className = '';
+                gameArea.classList.add('started'); // 빨간색 (실패 표시)
+                gameArea.textContent = '실패!';
+                startButton.disabled = false; // 다시 시작 버튼 활성화
+                gameStarted = false; // 게임 종료
+            }
+        }
+
+        gameArea.addEventListener('click', handleClick);
+        startButton.addEventListener('click', startGame); // 다시 시작 버튼 클릭 시 게임 시작
+        
+        // 초기 상태 설정
+        resetGame();
+
+        // 키보드/터치 이벤트 (옵션: 스페이스바 등으로 시작/정지 가능하게 하려면 추가)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // 스페이스바 스크롤 방지
+                handleClick();
+            }
+        });
+    </script>
+</body>
+</html>
