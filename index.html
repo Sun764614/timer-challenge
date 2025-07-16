@@ -10,7 +10,7 @@
             text-align: center;
             background: #e6f2ff;
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* 패딩 줄여서 공간 확보 */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -20,49 +20,57 @@
         }
         h1 {
             color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 3em; /* 더 크게 */
+            margin-bottom: 20px; /* 마진 줄여서 공간 확보 */
+            font-size: 2.8em; /* 큰 타이틀 유지 */
         }
         .game-selection {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            width: 80%; /* 가로 너비 제한 */
-            max-width: 500px; /* 최대 너비 */
+            gap: 15px; /* 버튼 간격 줄여서 공간 확보 */
+            width: 90%; /* 가로 너비 증가 */
+            max-width: 400px; /* 최대 너비 제한 (모바일에서 적절) */
+            flex-grow: 1; /* 남은 공간을 채우도록 성장 */
+            justify-content: center; /* 세로 중앙 정렬 */
         }
         .game-button {
             display: block;
-            padding: 25px;
+            padding: 18px; /* 패딩 줄여서 버튼 높이 감소 */
             background-color: #007bff;
             color: white;
             text-decoration: none;
-            font-size: 2.5em; /* 더 크게 */
+            font-size: 2em; /* 폰트 크기 조정 */
             font-weight: bold;
-            border-radius: 15px;
+            border-radius: 12px; /* 둥근 모서리 유지 */
             transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* 그림자 조정 */
         }
         .game-button:hover {
             background-color: #0056b3;
-            transform: translateY(-5px); /* 호버 시 약간 위로 */
+            transform: translateY(-3px); /* 호버 시 약간 위로 */
         }
         .game-button:active {
             transform: translateY(0); /* 클릭 시 원위치 */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
 
-        /* 모바일 반응형 */
+        /* 모바일 반응형 - 한 화면에 보이도록 최적화 */
         @media (max-width: 600px) {
-            h1 {
-                font-size: 2.2em;
-                margin-bottom: 20px;
+            body {
+                padding: 5px; /* 모바일 패딩 더 줄임 */
+                justify-content: flex-start; /* 상단에서 시작하여 전체 화면 활용 */
             }
-            .game-button {
-                font-size: 1.8em;
-                padding: 20px;
+            h1 {
+                font-size: 2em; /* 모바일 타이틀 크기 조정 */
+                margin-bottom: 15px; /* 모바일 마진 조정 */
             }
             .game-selection {
-                width: 90%;
+                width: 95%; /* 모바일에서 더 넓게 */
+                gap: 10px; /* 모바일 버튼 간격 더 줄임 */
+                padding-bottom: 10px; /* 하단 패딩 추가 */
+            }
+            .game-button {
+                font-size: 1.5em; /* 모바일 폰트 크기 조정 */
+                padding: 15px; /* 모바일 패딩 조정 */
             }
         }
     </style>
@@ -70,10 +78,13 @@
 <body>
     <h1>🎮 KY YH를 위한 게임 🚀</h1>
     <div class="game-selection">
+        <a href="rocket_launch.html" class="game-button">🚀 로켓 발사 챌린지</a>
+        <a href="target_practice.html" class="game-button">🎯 과녁 맞추기 게임</a>
         <a href="timer_challenge.html" class="game-button">⏱️ 타이머 챌린지</a>
         <a href="reaction_test.html" class="game-button">⚡ 반응 속도 테스트</a>
-        <a href="number_guessing.html" class="game-button">❓ 숫자 맞추기 게임</a>
+        <a href="whac_a_mole.html" class="game-button">💥 두더지 잡기</a>
         <a href="rps_game.html" class="game-button">✂️ 가위바위보</a>
-        <a href="whac_a_mole.html" class="game-button">💥 두더지 잡기</a> </div>
+        <a href="number_guessing.html" class="game-button">❓ 숫자 맞추기 게임</a>
+    </div>
 </body>
 </html>

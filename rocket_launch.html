@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로켓 발사 챌린지</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #87ceeb, #c1e0f7); /* 하늘색 그라데이션 */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden; /* 스크롤 방지 */
+            position: relative; /* 배경 요소 배치를 위해 */
+            transition: background 2s ease-out; /* 배경 전환 효과 */
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+        #instruction {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+        #gameInfo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2e8b57;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+        #clickCountDisplay, #timerDisplay {
+            margin: 0 10px;
+        }
+
+        #gameArea {
+            width: 350px; /* 게임 영역 너비 */
+            height: 500px; /* 게임 영역 높이 */
+            background-color: #f0f4f8; /* 클릭 대기 중 배경색 (하늘색 계열) */
+            position: relative;
+            overflow: hidden; /* 로켓이 영역 밖으로 나가지 않게 */
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer; /* 클릭 가능한 영역 표시 */
+            display: flex; /* 메시지 중앙 정렬을 위해 */
+            align-items: center;
+            justify-content: center;
+            font-size: 3em; /* 클릭 중 메시지 크기 */
+            font-weight: bold;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE 10+ */
+            user-select: none;          /* Standard */
+        }
+
+        /* 대기권 층 (게임 종료 후 애니메이션에서만 나타남) */
+        .atmosphere-layer {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            box-sizing: border-box;
+            border-top: 1px dashed rgba(255,255,255,0.5); /* 층 경계선 */
+            transition: transform 5s ease-out; /* 로켓 발사 시 부드러운 이동 (속도 느리게) */
+        }
+
+        /* 각 층의 색상 및 초기 위치 (바닥에서부터 위로) */
+        .troposphere { background-color: rgba(135,206,235,0.3); height: 100px; bottom: 0px; font-size: 0.9em;} /* 대류권 */
+        .stratosphere { background-color: rgba(100,149,237,0.3); height: 100px; bottom: 100px; font-size: 0.9em;} /* 성층권 */
+        .mesosphere { background-color: rgba(65,105,225,0.3); height: 100px; bottom: 200px; font-size: 0.9em;} /* 중간권 */
+        .thermosphere { background-color: rgba(25,25,112,0.3); height: 100px; bottom: 300px; font-size: 0.9em;} /* 열권 */
+        .exosphere { background-color: rgba(0,0,0,0.3); height: 100px; bottom: 400px; font-size: 0.9em;} /* 외기권 (우주 시작점) */
+
+        #rocket {
+            width: 50px;
+            height: 100px;
+            background-color: #ff4500; /* 로켓 색상 */
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; /* 로켓 모양 */
+            position: absolute;
+            bottom: -100px; /* 초기에는 게임 영역 밖에 숨겨둠 */
+            left: 50%;
+            transform: translateX(-50%);
+            transition: bottom 5s ease-out; /* 발사 애니메이션 시간 (속도 느리게) */
+            z-index: 50;
+            opacity: 0; /* 초기에는 숨김 */
+        }
+        #rocket.flying {
+            opacity: 1; /* 날아갈 때 보임 */
+        }
+
+        #rocket::after { /* 로켓 꼬리 불꽃 */
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to top, orange, yellow);
+            border-radius: 50%;
+            opacity: 0.8;
+            filter: blur(5px);
+            z-index: -1;
+            animation: flame 0.2s infinite alternate;
+        }
+        /* 로켓이 날아가지 않을 때는 불꽃 애니메이션 정지 */
+        #rocket:not(.flying)::after {
+            animation: none;
+            opacity: 0;
+        }
+
+        @keyframes flame {
+            from { transform: translateX(-50%) scaleY(1); opacity: 0.8; }
+            to { transform: translateX(-50%) scaleY(1.2); opacity: 1; }
+        }
+
+        #message {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #c2185b;
+            min-height: 1.5em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+        .start-buttons button {
+            padding: 15px 30px;
+            font-size: 1.8em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 10px 5px;
+            z-index: 10;
+        }
+        .start-buttons button:hover {
+            background-color: #0056b3;
+        }
+        .start-buttons button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #resetButton {
+            background-color: #6c757d;
+        }
+        #resetButton:hover {
+            background-color: #5a6268;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            #instruction {
+                font-size: 1em;
+            }
+            #gameInfo {
+                font-size: 1.5em;
+            }
+            #gameArea {
+                width: 90%;
+                height: 400px;
+                font-size: 2.5em; /* 모바일 클릭 메시지 크기 */
+            }
+            .atmosphere-layer {
+                font-size: 0.8em;
+            }
+            #rocket {
+                width: 40px;
+                height: 80px;
+            }
+            .start-buttons button {
+                padding: 12px 25px;
+                font-size: 1.5em;
+            }
+            #message {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 로켓 발사 챌린지 🌟</h1>
+    <div id="instruction">제한 시간 안에 화면을 최대한 많이 클릭하세요!</div>
+    <div id="gameInfo">
+        <span id="clickCountDisplay">클릭 횟수: 0</span> | <span id="timerDisplay">남은 시간: 30초</span>
+    </div>
+
+    <div id="gameArea">
+        <span id="clickPrompt"></span> <div class="atmosphere-layer exosphere">외기권</div>
+        <div class="atmosphere-layer thermosphere">열권</div>
+        <div class="atmosphere-layer mesosphere">중간권</div>
+        <div class="atmosphere-layer stratosphere">성층권</div>
+        <div class="atmosphere-layer troposphere">대류권</div>
+        <div id="rocket"></div>
+    </div>
+    
+    <div id="message">시작 버튼을 눌러 게임을 시작하세요!</div>
+
+    <div class="start-buttons">
+        <button id="startButton">게임 시작</button>
+        <button id="resetButton" style="display: none;">다시 시작</button>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const rocket = document.getElementById('rocket');
+        const clickCountDisplay = document.getElementById('clickCountDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const messageDisplay = document.getElementById('message');
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const atmosphereLayers = document.querySelectorAll('.atmosphere-layer');
+        const clickPrompt = document.getElementById('clickPrompt'); // '눌러 눌러!' 메시지용
+
+        let clickCount = 0;
+        let timeLeft = 30; // 게임 시간 (초)
+        let gameInterval;
+        let gameActive = false;
+        const totalGameHeight = 500; // #gameArea의 고정 높이 (CSS와 일치)
+        const maxClicksForSpace = 100; // 우주 도달에 필요한 최소 클릭 횟수 (달)
+
+        // 초기 설정 및 층/로켓 숨기기
+        function initializeGameArea() {
+            // 모든 층 숨기기 (애니메이션 준비)
+            atmosphereLayers.forEach(layer => {
+                layer.style.opacity = '0'; // 투명하게 만듦
+                layer.style.transform = `translateY(0px)`; // 기본 위치로 초기화
+            });
+            rocket.style.bottom = '-100px'; // 로켓 숨기기
+            rocket.classList.remove('flying'); // 불꽃 애니메이션 제거
+            rocket.style.opacity = '0'; // 로켓 완전히 숨김
+            
+            clickPrompt.textContent = ''; // 초기 메시지 없음
+            gameArea.style.backgroundColor = '#f0f4f8'; // 클릭 대기 배경색
+            document.body.style.background = 'linear-gradient(to bottom, #87ceeb, #c1e0f7)'; // 초기 하늘 배경
+            document.body.style.transition = 'none'; // 배경 전환 효과 없음 (즉시 변경)
+        }
+
+        // 클릭 이벤트 핸들러
+        function handleGameClick() {
+            if (!gameActive) return;
+
+            clickCount++;
+            clickCountDisplay.textContent = `클릭 횟수: ${clickCount}`;
+            clickPrompt.textContent = '클릭!'; // 클릭 시 잠깐 '클릭!' 표시
+            setTimeout(() => {
+                if (gameActive) { // 게임 중일 때만 다시 '눌러 눌러!'
+                    clickPrompt.textContent = '눌러 눌러!';
+                }
+            }, 100); // 0.1초 후 다시 '눌러 눌러!'로 변경
+        }
+
+        // 게임 시작 함수
+        function startGame() {
+            if (gameActive) return;
+
+            clickCount = 0;
+            timeLeft = 30; // 시간 초기화
+            gameActive = true;
+            
+            clickCountDisplay.textContent = `클릭 횟수: ${clickCount}`;
+            timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+            messageDisplay.textContent = `게임을 시작합니다! 목표: ${maxClicksForSpace} 클릭`;
+            messageDisplay.style.color = '#2e8b57';
+
+            startButton.disabled = true;
+            resetButton.style.display = 'none';
+
+            // 게임 중에는 층과 로켓 숨기기, 클릭 메시지 표시
+            initializeGameArea(); // 다시 초기화 (층 숨김)
+            clickPrompt.textContent = '눌러 눌러!'; // 클릭 중 메시지 표시
+            gameArea.style.cursor = 'pointer'; // 클릭 가능한 커서
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000); // 1초마다 타이머 감소
+        }
+
+        // 게임 종료 함수 (로켓 발사 애니메이션 포함)
+        function endGame() {
+            clearInterval(gameInterval);
+            gameActive = false;
+            clickPrompt.textContent = ''; // 클릭 중 메시지 제거
+            gameArea.style.cursor = 'default'; // 기본 커서
+
+            messageDisplay.textContent = `게임 종료! ${clickCount}회 클릭! 로켓 발사를 준비합니다...`;
+            messageDisplay.style.color = '#007bff'; // 메시지 색상 변경
+
+            // 로켓 발사 애니메이션 준비 및 시작
+            gameArea.style.backgroundColor = '#000'; // 우주 배경으로 변경
+            rocket.style.bottom = `0px`; // 로켓을 바닥에서 보이게 준비
+            rocket.classList.add('flying'); // 로켓을 보이게 하고 불꽃 애니메이션 시작
+            rocket.style.opacity = '1'; // 로켓 나타나게 함
+
+            // 대기권 층들을 나타나게 하고 초기 위치로 설정
+            atmosphereLayers.forEach(layer => {
+                layer.style.opacity = '1'; // 층 나타나게 함
+                layer.style.transform = `translateY(0px)`; // 초기 위치 (게임 영역 하단)
+            });
+
+
+            setTimeout(() => { // 짧은 대기 후 실제 로켓 발사 애니메이션 시작
+                const finalRocketTravel = totalGameHeight + 150; // 로켓이 게임 영역 밖으로 완전히 벗어나는 거리
+
+                rocket.style.bottom = `${finalRocketTravel}px`; // 로켓을 게임 영역 상단 너머로 이동
+
+                // 대기권 층도 로켓 움직임에 맞춰 반대 방향으로 스크롤
+                atmosphereLayers.forEach(layer => {
+                    layer.style.transform = `translateY(${finalRocketTravel}px)`; // 모든 층을 로켓 이동량만큼 아래로 이동
+                });
+            }, 500); // 0.5초 대기 후 발사
+
+
+            setTimeout(() => { // 애니메이션이 끝난 후 최종 결과 메시지 및 배경 표시
+                let finalMessage = '';
+                let destinationBackground = '#000000'; // 기본 우주 배경
+
+                if (clickCount >= 1000) {
+                    finalMessage = `✨ 환상적이야! ${clickCount}회 클릭으로 성간 우주에 도달했습니다! ✨`;
+                    destinationBackground = 'radial-gradient(circle, #0a0a2a, #000000)'; // 더 깊은 우주
+                } else if (clickCount >= 700) {
+                    finalMessage = `🌌 대단해요! ${clickCount}회 클릭으로 카이퍼 벨트에 도달했습니다! 🌌`;
+                    destinationBackground = 'radial-gradient(circle, #1a1a3a, #000000)';
+                } else if (clickCount >= 600) {
+                    finalMessage = `⚪ 놀라워요! ${clickCount}회 클릭으로 명왕성에 도달했습니다! ⚪`;
+                    destinationBackground = 'radial-gradient(circle, #2a2a4a, #000000)';
+                } else if (clickCount >= 500) {
+                    finalMessage = `🟢 멋져요! ${clickCount}회 클릭으로 해왕성에 도달했습니다! 🟢`;
+                    destinationBackground = 'radial-gradient(circle, #3a3a5a, #000000)';
+                } else if (clickCount >= 400) {
+                    finalMessage = `🔵 엄청나요! ${clickCount}회 클릭으로 천왕성에 도달했습니다! 🔵`;
+                    destinationBackground = 'radial-gradient(circle, #4a4a6a, #000000)';
+                } else if (clickCount >= 300) {
+                    finalMessage = `🪐 대단해요! ${clickCount}회 클릭으로 토성에 도달했습니다! 🪐`;
+                    destinationBackground = 'radial-gradient(circle, #5a5a7a, #000000)';
+                } else if (clickCount >= 200) {
+                    finalMessage = `🟠 환상적이야! ${clickCount}회 클릭으로 목성에 도달했습니다! 🟠`;
+                    destinationBackground = 'radial-gradient(circle, #6a6a8a, #000000)';
+                } else if (clickCount >= 150) {
+                    finalMessage = `🔴 대단해요! ${clickCount}회 클릭으로 화성에 도달했습니다! 🔴`;
+                    destinationBackground = 'radial-gradient(circle, #7a7a9a, #000000)';
+                } else if (clickCount >= maxClicksForSpace) { // maxClicksForSpace = 100
+                    finalMessage = `🌙 성공! ${clickCount}회 클릭으로 달에 도달했습니다! 🌙`;
+                    destinationBackground = 'radial-gradient(circle, #8a8aa0, #000000)'; // 약간 밝은 달 배경
+                } else {
+                    finalMessage = `😢 아쉽네요! ${clickCount}회 클릭! 목표에 도달하지 못했습니다. 다시 도전해보세요!`;
+                    destinationBackground = 'linear-gradient(to bottom, #87ceeb, #c1e0f7)'; // 실패 시 하늘색 배경
+                }
+
+                messageDisplay.textContent = finalMessage;
+                // 배경 전환 효과를 다시 활성화 (부드러운 전환을 위해)
+                document.body.style.transition = 'background 2s ease-out';
+                document.body.style.background = destinationBackground;
+                
+                startButton.disabled = false;
+                resetButton.style.display = 'inline-block';
+            }, 5500); // 로켓 transition 시간(5s) + 초기 대기(0.5s) 후 메시지 표시
+        }
+
+        // 게임 초기화 함수
+        function resetGame() {
+            clearInterval(gameInterval);
+            gameActive = false;
+            clickCount = 0;
+            timeLeft = 30;
+            clickCountDisplay.textContent = `클릭 횟수: ${clickCount}`;
+            timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+            messageDisplay.textContent = '시작 버튼을 눌러 게임을 시작하세요!';
+            messageDisplay.style.color = '#c2185b';
+            
+            initializeGameArea(); // 층, 로켓, 배경, 메시지 초기화
+
+            startButton.disabled = false;
+            resetButton.style.display = 'none';
+        }
+
+        // 이벤트 리스너
+        gameArea.addEventListener('click', handleGameClick);
+        startButton.addEventListener('click', startGame);
+        resetButton.addEventListener('click', resetGame);
+
+        // 페이지 로드 시 초기 설정
+        document.addEventListener('DOMContentLoaded', initializeGameArea);
+
+        // 모바일 터치 이벤트도 처리
+        gameArea.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // 기본 터치 동작 (스크롤 등) 방지
+            handleGameClick();
+        });
+    </script>
+</body>
+</html>
