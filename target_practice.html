@@ -1,29 +1,271 @@
-// 기존 handleShot 함수를 아래 코드로 교체해주세요.
-function handleShot(event) {
-    if (!gameActive) return;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과녁 맞추기 게임</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: #e0f7fa; /* 연한 하늘색 배경 */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden; /* 스크롤 방지 */
+        }
+        h1 {
+            color: #00796b; /* 진한 청록색 */
+            font-size: 2.8em;
+            margin-bottom: 20px;
+        }
+        #scoreDisplay {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #004d40;
+            margin-bottom: 20px;
+        }
+        #timerDisplay {
+            font-size: 1.5em;
+            color: #d84315; /* 주황색 */
+            margin-bottom: 20px;
+        }
+        #targetContainer {
+            position: relative; /* 자식 요소 절대 위치 지정 */
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #eee 100%); /* 흰색에서 회색 그라데이션 */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            cursor: crosshair; /* 과녁 커서 */
+            overflow: hidden; /* 마커가 밖으로 나가지 않도록 */
+        }
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            background: transparent;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* 과녁 링 스타일 (중심부터) */
+        .ring.center {
+            width: 60px;
+            height: 60px;
+            background-color: #ffeb3b; /* 노란색 (중앙) */
+        }
+        .ring.inner {
+            width: 120px;
+            height: 120px;
+            background-color: #ff9800; /* 주황색 */
+        }
+        .ring.middle {
+            width: 180px;
+            height: 180px;
+            background-color: #f44336; /* 빨간색 */
+        }
+        .ring.outer {
+            width: 240px;
+            height: 240px;
+            background-color: #2196f3; /* 파란색 */
+        }
+        .ring.outermost {
+            width: 300px;
+            height: 300px;
+            background-color: #4caf50; /* 초록색 */
+        }
 
-    // 클릭된 정확한 좌표 가져오기
-    const clickX = event.clientX;
-    const clickY = event.clientY;
+        #hitMarker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #000;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.1s ease-out; /* 부드러운 효과 */
+            pointer-events: none; /* 클릭 이벤트 방해하지 않음 */
+            z-index: 10;
+            transform: translate(-50%, -50%); /* 중앙 정렬 */
+        }
 
-    const containerRect = targetContainer.getBoundingClientRect();
+        #messageDisplay {
+            font-size: 1.4em;
+            font-weight: bold;
+            min-height: 1.4em; /* 메시지 표시 공간 확보 */
+            margin-top: 10px;
+        }
+        #messageDisplay.success {
+            color: #28a745;
+        }
+        #messageDisplay.error {
+            color: #dc3545;
+        }
 
-    // hitMarker 위치 계산 (과녁판 기준)
-    const markerX = clickX - containerRect.left;
-    const markerY = clickY - containerRect.top;
+        button {
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 과녁 맞추기 게임</h1>
+    <div id="scoreDisplay">점수: 0</div>
+    <div id="timerDisplay">남은 시간: 30초</div>
 
-    // hitMarker 표시
-    hitMarker.style.left = `${markerX}px`;
-    hitMarker.style.top = `${markerY}px`;
-    hitMarker.style.opacity = '1';
-    setTimeout(() => {
-        hitMarker.style.opacity = '0'; // 잠시 후 사라지게
-    }, 300); // 0.3초 후 사라짐
+    <div id="targetContainer">
+        <div class="ring outermost"></div>
+        <div class="ring outer"></div>
+        <div class="ring middle"></div>
+        <div class="ring inner"></div>
+        <div class="ring center"></div>
+        <div id="hitMarker"></div>
+    </div>
 
-    const points = calculateScore(clickX, clickY);
-    score += points;
-    scoreDisplay.textContent = `점수: ${score}`;
-    messageDisplay.textContent = `${points}점 획득!`;
-    messageDisplay.style.color = points > 0 ? '#28a745' : '#dc3545'; // 점수에 따라 색상 변경
-    setTimeout(() => messageDisplay.textContent = '', 500); // 메시지 0.5초 후 제거
-}
+    <div id="messageDisplay">게임 시작 버튼을 누르세요!</div>
+    <button id="startButton">게임 시작</button>
+
+    <script>
+        const targetContainer = document.getElementById('targetContainer');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const startButton = document.getElementById('startButton');
+        const hitMarker = document.getElementById('hitMarker');
+
+        let score = 0;
+        let timeLeft = 30; // 게임 시간 (초)
+        let gameInterval;
+        let gameActive = false;
+
+        // 점수 계산 함수
+        function calculateScore(clickX, clickY) {
+            const rect = targetContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const distance = Math.sqrt(
+                Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2)
+            );
+
+            // 과녁 링 크기 (반지름)
+            const radiusOutermost = rect.width / 2; // 150px
+            const radiusOuter = radiusOutermost * (240 / 300); // 120px
+            const radiusMiddle = radiusOutermost * (180 / 300); // 90px
+            const radiusInner = radiusOutermost * (120 / 300); // 60px
+            const radiusCenter = radiusOutermost * (60 / 300); // 30px
+
+            if (distance <= radiusCenter) {
+                return 100; // 중앙
+            } else if (distance <= radiusInner) {
+                return 70; // 안쪽
+            } else if (distance <= radiusMiddle) {
+                return 50; // 중간
+            } else if (distance <= radiusOuter) {
+                return 30; // 바깥쪽
+            } else if (distance <= radiusOutermost) {
+                return 10; // 가장 바깥쪽
+            } else {
+                return 0; // 과녁 밖
+            }
+        }
+
+        // 클릭 처리 함수 (이 부분은 이전 대화에서 제공한 내용과 동일합니다)
+        function handleShot(event) {
+            if (!gameActive) return;
+
+            // 클릭된 정확한 좌표 가져오기
+            const clickX = event.clientX;
+            const clickY = event.clientY;
+
+            const containerRect = targetContainer.getBoundingClientRect();
+
+            // hitMarker 위치 계산 (과녁판 기준)
+            const markerX = clickX - containerRect.left;
+            const markerY = clickY - containerRect.top;
+
+            // hitMarker 표시
+            hitMarker.style.left = `${markerX}px`;
+            hitMarker.style.top = `${markerY}px`;
+            hitMarker.style.opacity = '1';
+            setTimeout(() => {
+                hitMarker.style.opacity = '0'; // 잠시 후 사라지게
+            }, 300); // 0.3초 후 사라짐
+
+            const points = calculateScore(clickX, clickY);
+            score += points;
+            scoreDisplay.textContent = `점수: ${score}`;
+            messageDisplay.textContent = `${points}점 획득!`;
+            messageDisplay.style.color = points > 0 ? '#28a745' : '#dc3545'; // 점수에 따라 색상 변경
+            setTimeout(() => messageDisplay.textContent = '', 500); // 메시지 0.5초 후 제거
+        }
+
+
+        // 게임 시작 함수
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            gameActive = true;
+            scoreDisplay.textContent = `점수: ${score}`;
+            timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+            messageDisplay.textContent = '게임을 시작합니다! 과녁을 클릭하세요.';
+            messageDisplay.style.color = '#333';
+            startButton.disabled = true; // 게임 시작 시 버튼 비활성화
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000); // 1초마다 타이머 감소
+        }
+
+        // 게임 종료 함수
+        function endGame() {
+            clearInterval(gameInterval);
+            gameActive = false;
+            messageDisplay.textContent = `게임 종료! 최종 점수: ${score}점`;
+            messageDisplay.style.color = score > 0 ? '#00796b' : '#dc3545';
+            startButton.disabled = false; // 게임 종료 시 버튼 다시 활성화
+            startButton.textContent = '다시 시작';
+        }
+
+        // 이벤트 리스너
+        targetContainer.addEventListener('click', handleShot);
+        startButton.addEventListener('click', startGame);
+
+        // 초기화 시점
+        document.addEventListener('DOMContentLoaded', () => {
+            messageDisplay.textContent = '시작 버튼을 눌러 게임을 시작하세요!';
+            startButton.textContent = '게임 시작';
+        });
+    </script>
+</body>
+</html>
