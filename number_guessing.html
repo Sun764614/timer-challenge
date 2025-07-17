@@ -5,10 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>숫자 맞추기 게임</title>
     <style>
+        :root {
+            --primary-color: #4a90e2; /* 파란색 */
+            --secondary-color: #72b2f2; /* 연한 파란색 */
+            --background-color: #e6f7ff; /* 아주 연한 파란색 배경 */
+            --button-bg: #4CAF50; /* 녹색 */
+            --button-hover-bg: #45a049; /* 진한 녹색 */
+            --reset-button-bg: #f44336; /* 빨간색 */
+            --reset-button-hover-bg: #da190b; /* 진한 빨간색 */
+            --text-color: #333;
+            --success-color: #28a745; /* 성공 초록 */
+            --error-color: #dc3545; /* 에러 빨강 */
+            --info-color: #007bff; /* 정보 파랑 */
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
-            background: #e6f7ff;
+            background: var(--background-color);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -16,12 +30,14 @@
             min-height: 100vh;
             justify-content: center;
             align-items: center;
-            color: #333;
+            color: var(--text-color);
+            overflow: hidden; /* 스크롤 방지 */
         }
         h1 {
-            color: #2c3e50;
+            color: var(--primary-color);
             font-size: 2.5em;
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         #gameContainer {
             background-color: white;
@@ -30,60 +46,96 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             max-width: 500px;
             width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         p {
             font-size: 1.2em;
             line-height: 1.5;
             margin-bottom: 15px;
         }
-        #message {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #4a90e2;
-            min-height: 1.5em; /* 메시지 영역 높이 유지 */
-            margin-bottom: 20px;
-        }
         input[type="number"] {
-            width: 100px;
-            padding: 12px;
+            padding: 12px 15px;
             font-size: 1.5em;
-            border: 2px solid #ccc;
+            border: 2px solid var(--primary-color);
             border-radius: 8px;
+            width: 80%;
+            max-width: 200px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
         }
-        button {
-            padding: 12px 25px;
-            font-size: 1.5em;
-            font-weight: bold;
-            background-color: #007bff;
+        .button {
+            background-color: var(--button-bg);
             color: white;
             border: none;
+            padding: 12px 25px;
             border-radius: 8px;
+            font-size: 1.2em;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin: 5px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 5px; /* 버튼 사이 간격 */
         }
-        button:hover {
-            background-color: #0056b3;
+        .button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px);
         }
-        button:disabled {
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        .button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
-        }
-        #attempts {
-            font-size: 1.2em;
-            color: #555;
-            margin-top: 15px;
-        }
-        .success {
-            color: #28a745 !important;
-        }
-        .error {
-            color: #dc3545 !important;
+            transform: none;
+            box-shadow: none;
         }
 
-        /* 모바일 반응형 */
+        #resetButton {
+            background-color: var(--reset-button-bg);
+        }
+        #resetButton:hover {
+            background-color: var(--reset-button-hover-bg);
+        }
+
+        #attemptsDisplay {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            transition: transform 0.2s ease-out, color 0.2s ease-out; /* 애니메이션 효과 */
+        }
+        /* 시도 횟수 업데이트 시 적용될 클래스 */
+        .attempts-update {
+            transform: scale(1.1);
+            color: var(--secondary-color);
+        }
+
+        #messageDisplay {
+            font-size: 1.3em;
+            min-height: 60px; /* 메시지가 들어가도 레이아웃이 흔들리지 않게 최소 높이 설정 */
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease-in-out; /* 메시지 변화 애니메이션 */
+            color: var(--text-color); /* 기본 텍스트 색상 */
+        }
+        /* 메시지 유형별 색상 */
+        .message-success {
+            color: var(--success-color);
+        }
+        .message-error {
+            color: var(--error-color);
+        }
+        .message-info {
+            color: var(--info-color);
+        }
+
+        /* 미디어 쿼리 - 모바일 반응형 */
         @media (max-width: 600px) {
             h1 {
                 font-size: 2em;
@@ -91,88 +143,102 @@
             #gameContainer {
                 padding: 20px;
             }
-            p {
-                font-size: 1em;
-            }
-            #message {
-                font-size: 1.5em;
-            }
             input[type="number"] {
-                width: 80px;
-                padding: 10px;
                 font-size: 1.2em;
+                padding: 10px 12px;
             }
-            button {
-                padding: 10px 20px;
-                font-size: 1.2em;
-            }
-            #attempts {
+            .button {
                 font-size: 1em;
+                padding: 10px 20px;
+            }
+            #attemptsDisplay {
+                font-size: 1.2em;
+            }
+            #messageDisplay {
+                font-size: 1em;
+                min-height: 50px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>❓ 숫자 맞추기 게임!</h1>
+    <h1>🔢 숫자 맞추기 게임 🎯</h1>
     <div id="gameContainer">
-        <p>저는 1부터 100까지의 숫자 중 하나를 생각하고 있어요.</p>
-        <p>제가 생각한 숫자를 맞춰보세요!</p>
-        <div id="message"></div>
-        <input type="number" id="guessInput" min="1" max="100" placeholder="숫자 입력" autofocus>
-        <button id="submitGuess">확인</button>
-        <button id="resetGame">다시 시작</button>
-        <p id="attempts">시도 횟수: 0</p>
+        <p>1부터 100 사이의 숫자를 맞춰보세요!</p>
+        <input type="number" id="guessInput" min="1" max="100" step="1" placeholder="숫자를 입력하세요">
+        <button id="submitButton" class="button">추측하기</button>
+        <p id="attemptsDisplay">시도 횟수: 0</p>
+        <div id="messageDisplay">게임을 시작해 보세요!</div>
+        <button id="resetButton" class="button">다시 시작</button>
     </div>
 
     <script>
-        let randomNumber;
-        let attempts = 0;
         const guessInput = document.getElementById('guessInput');
-        const submitButton = document.getElementById('submitGuess');
-        const resetButton = document.getElementById('resetGame');
-        const messageDisplay = document.getElementById('message');
-        const attemptsDisplay = document.getElementById('attempts');
+        const submitButton = document.getElementById('submitButton');
+        const attemptsDisplay = document.getElementById('attemptsDisplay');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const resetButton = document.getElementById('resetButton');
 
+        let randomNumber;
+        let attempts;
+
+        // 게임 초기화 함수
         function initializeGame() {
-            randomNumber = Math.floor(Math.random() * 100) + 1; // 1부터 100까지의 숫자
+            randomNumber = Math.floor(Math.random() * 100) + 1; // 1부터 100 사이의 랜덤 숫자 생성
             attempts = 0;
-            messageDisplay.textContent = '숫자를 맞춰보세요!';
+            updateAttemptsDisplay();
+            messageDisplay.textContent = '게임을 시작해 보세요!';
             messageDisplay.className = ''; // 클래스 초기화
-            attemptsDisplay.textContent = `시도 횟수: ${attempts}`;
-            guessInput.value = '';
-            guessInput.disabled = false;
-            submitButton.disabled = false;
-            guessInput.focus(); // 입력 필드에 자동으로 포커스
+            guessInput.value = ''; // 입력 필드 초기화
+            guessInput.disabled = false; // 입력 필드 활성화
+            submitButton.disabled = false; // 버튼 활성화
+            guessInput.focus(); // 입력 필드에 포커스
         }
 
+        // 시도 횟수 업데이트 및 애니메이션
+        function updateAttemptsDisplay() {
+            attemptsDisplay.textContent = `시도 횟수: ${attempts}`;
+            attemptsDisplay.classList.add('attempts-update'); // 애니메이션 클래스 추가
+            setTimeout(() => {
+                attemptsDisplay.classList.remove('attempts-update'); // 잠시 후 제거
+            }, 300); // 0.3초 후 애니메이션 종료
+        }
+
+        // 메시지 표시 함수
+        function showMessage(text, type = '') { // type: 'success', 'error', 'info'
+            messageDisplay.textContent = text;
+            messageDisplay.className = `message-${type}`;
+        }
+
+        // 추측 확인 함수
         function checkGuess() {
             const userGuess = parseInt(guessInput.value);
 
+            // 입력값 유효성 검사
             if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
-                messageDisplay.textContent = '1에서 100 사이의 유효한 숫자를 입력해주세요.';
-                messageDisplay.className = 'error';
+                showMessage('1에서 100 사이의 유효한 숫자를 입력해주세요.', 'error');
+                guessInput.value = ''; // 잘못된 입력값 초기화
+                guessInput.focus();
                 return;
             }
 
             attempts++;
-            attemptsDisplay.textContent = `시도 횟수: ${attempts}`;
+            updateAttemptsDisplay(); // 시도 횟수 업데이트
 
             if (userGuess === randomNumber) {
-                messageDisplay.textContent = `🎉 축하해요! ${userGuess}가 정답입니다! ${attempts}번 만에 맞췄어요!`;
-                messageDisplay.className = 'success';
-                guessInput.disabled = true;
-                submitButton.disabled = true;
+                showMessage(`🎉 축하해요! ${userGuess}가 정답입니다! ${attempts}번 만에 맞췄어요!`, 'success');
+                guessInput.disabled = true; // 게임 종료 후 입력 비활성화
+                submitButton.disabled = true; // 게임 종료 후 버튼 비활성화
             } else if (userGuess < randomNumber) {
-                messageDisplay.textContent = '⬆️ 더 높게!';
-                messageDisplay.className = '';
+                showMessage('⬆️ 더 높게!', 'info');
             } else {
-                messageDisplay.textContent = '⬇️ 더 낮게!';
-                messageDisplay.className = '';
+                showMessage('⬇️ 더 낮게!', 'info');
             }
-            guessInput.value = ''; // 입력값 초기화
+            guessInput.value = ''; // 입력값 초기화 (여기서 초기화)
             guessInput.focus(); // 다시 입력 필드에 포커스
         }
 
+        // 이벤트 리스너
         submitButton.addEventListener('click', checkGuess);
         resetButton.addEventListener('click', initializeGame);
 
@@ -183,7 +249,7 @@
             }
         });
 
-        // 게임 초기화
+        // 페이지 로드 시 게임 초기화
         initializeGame();
     </script>
 </body>

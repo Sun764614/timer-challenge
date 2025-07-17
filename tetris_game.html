@@ -26,6 +26,7 @@
             margin: 0;
             padding: 10px;
             box-sizing: border-box;
+            overflow: hidden; /* 스크롤 방지 */
         }
         h1 {
             font-size: 2em;
@@ -138,15 +139,81 @@
             text-align: center;
         }
 
-        /* 모바일 화면 대응 */
+        /* ----------- 모바일 화면 최적화 (수정된 부분) ----------- */
         @media (max-width: 600px) {
-            body { justify-content: flex-start; }
-            h1 { font-size: 1.5em; }
-            #game-container { gap: 10px; }
-            #main-content { flex-direction: column-reverse; }
-            .grid-cell { width: 6vw; height: 6vw; }
-            #sidebar { width: 100%; flex-direction: row; justify-content: space-around; align-items: center; }
-            #next-block-display { text-align: center; }
+            body {
+                justify-content: flex-start; /* 상단부터 채우기 */
+                padding: 5px;
+            }
+            h1 {
+                font-size: 1.5em; /* 제목 크기 줄이기 */
+                margin-bottom: 5px; /* 제목 아래 여백 줄이기 */
+            }
+            #game-container {
+                gap: 8px; /* 전체 요소 간 간격 줄이기 */
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            /* CSS Grid를 사용하여 화면 전체 레이아웃 재구성 */
+            #main-content {
+                display: grid;
+                grid-template-columns: 1fr 120px; /* 게임 보드 | 사이드바 */
+                grid-template-rows: auto;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            #game-board {
+                grid-column: 1 / 2; /* 첫 번째 컬럼에 배치 */
+            }
+
+            .grid-cell {
+                width: 100%; /* 너비를 grid 컬럼에 맞춤 (JS 계산 대신) */
+                padding-top: 100%; /* 높이를 너비와 같게 만드는 트릭 */
+                position: relative;
+            }
+            
+            #sidebar {
+                grid-column: 2 / 3; /* 두 번째 컬럼에 배치 */
+                width: auto;
+                gap: 8px;
+            }
+            
+            #score-display, #next-block-display {
+                padding: 8px; /* 사이드바 내부 여백 줄이기 */
+                font-size: 0.9em;
+                text-align: center;
+            }
+            
+            #next-block-preview {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1 / 1; /* 가로세로 비율 1:1 유지 */
+                margin-top: 5px;
+            }
+            .preview-cell {
+                width: 100%;
+                height: 100%;
+            }
+            
+            #start-button {
+                padding: 10px;
+                font-size: 1.2em;
+                margin-top: 5px;
+            }
+            
+            #controls {
+                margin-top: 5px;
+                gap: 8px;
+                max-width: 100%;
+            }
+            .control-button {
+                padding: 10px;
+                font-size: 1.2em; /* 버튼 크기 줄이기 */
+                border-radius: 10px;
+            }
         }
     </style>
 </head>
@@ -206,16 +273,21 @@
             let nextBlock = null;
 
             function createBoard() {
-                gameBoardElem.innerHTML = '';
+                gameBoardElem.innerHTML = ''; // 기존 셀들 제거
+                const messageDiv = document.createElement('div'); // messageOverlay 다시 추가
+                messageDiv.id = 'message-overlay';
+                messageDiv.style.display = 'none';
+                gameBoardElem.appendChild(messageDiv);
+                
                 board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
                 gameBoardElem.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+                gameBoardElem.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`; // 행도 grid로 설정
+                
                 for (let i = 0; i < ROWS * COLS; i++) {
                     const cell = document.createElement('div');
                     cell.classList.add('grid-cell');
                     gameBoardElem.appendChild(cell);
                 }
-                const cellSize = gameBoardElem.clientWidth / COLS;
-                gameBoardElem.style.height = `${cellSize * ROWS}px`;
             }
 
             function generateBlock() {
@@ -230,14 +302,18 @@
             }
 
             function draw() {
-                const cells = gameBoardElem.children;
+                if (!gameBoardElem.children) return;
+                const cells = Array.from(gameBoardElem.children).filter(el => el.classList.contains('grid-cell'));
+
                 // 1. 보드 그리기
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         const cellIndex = r * COLS + c;
-                        cells[cellIndex].className = 'grid-cell'; // 초기화
-                        if (board[r][c]) {
-                            cells[cellIndex].classList.add(board[r][c]);
+                        if (cells[cellIndex]) {
+                            cells[cellIndex].className = 'grid-cell'; // 초기화
+                            if (board[r][c]) {
+                                cells[cellIndex].classList.add(board[r][c]);
+                            }
                         }
                     }
                 }
@@ -250,7 +326,9 @@
                                 const boardX = currentBlock.x + c;
                                 if (boardY < ROWS) {
                                     const cellIndex = boardY * COLS + boardX;
-                                    cells[cellIndex].classList.add(currentBlock.color);
+                                    if (cells[cellIndex]) {
+                                        cells[cellIndex].classList.add(currentBlock.color);
+                                    }
                                 }
                             }
                         });
@@ -262,11 +340,12 @@
                 nextBlockPreview.innerHTML = '';
                 const size = nextBlock.shape.length;
                 nextBlockPreview.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+                nextBlockPreview.style.gridTemplateRows = `repeat(${size}, 1fr)`;
                 for (let r = 0; r < size; r++) {
                     for (let c = 0; c < size; c++) {
                         const cell = document.createElement('div');
                         cell.classList.add('preview-cell');
-                        if (nextBlock.shape[r][c]) {
+                        if (nextBlock.shape[r] && nextBlock.shape[r][c]) {
                             cell.classList.add(nextBlock.color);
                         }
                         nextBlockPreview.appendChild(cell);
@@ -359,8 +438,11 @@
             function gameOver() {
                 isGameOver = true;
                 clearInterval(gameInterval);
-                messageOverlay.style.display = 'flex';
-                messageOverlay.textContent = `게임 오버\n최종 점수: ${score}`;
+                const msgOverlay = document.getElementById('message-overlay');
+                if (msgOverlay) {
+                    msgOverlay.style.display = 'flex';
+                    msgOverlay.textContent = `게임 오버\n최종 점수: ${score}`;
+                }
                 startButton.textContent = '다시 시작';
             }
 
@@ -368,7 +450,9 @@
                 isGameOver = false;
                 score = 0;
                 scoreDisplay.textContent = `점수: ${score}`;
-                messageOverlay.style.display = 'none';
+                const msgOverlay = document.getElementById('message-overlay');
+                if (msgOverlay) msgOverlay.style.display = 'none';
+
                 createBoard();
                 
                 currentBlock = generateBlock();

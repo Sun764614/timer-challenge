@@ -5,10 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>가위바위보 게임</title>
     <style>
+        :root {
+            --primary-color: #d63384; /* 진한 핑크 */
+            --secondary-color: #ff99cc; /* 연한 핑크 */
+            --background-color: #ffe6f2; /* 연한 핑크 배경 */
+            --button-bg: #8e24aa; /* 보라색 계열 */
+            --button-hover-bg: #ab47bc; /* 밝은 보라색 */
+            --win-color: #28a745; /* 초록색 */
+            --lose-color: #dc3545; /* 빨간색 */
+            --draw-color: #007bff; /* 파란색 */
+            --text-color: #333;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
-            background: #ffe6f2; /* 연한 핑크 배경 */
+            background: var(--background-color);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -16,12 +28,14 @@
             min-height: 100vh;
             justify-content: center;
             align-items: center;
-            color: #333;
+            color: var(--text-color);
+            overflow: hidden; /* 스크롤 방지 */
         }
         h1 {
-            color: #d63384; /* 진한 핑크 */
+            color: var(--primary-color);
             font-size: 2.8em;
             margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         #gameContainer {
             background-color: white;
@@ -30,66 +44,115 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             max-width: 600px;
             width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         #choices {
             display: flex;
             justify-content: center;
             gap: 20px;
             margin-bottom: 30px;
-            flex-wrap: wrap; /* 모바일에서 줄바꿈 */
+            flex-wrap: wrap; /* 모바일에서 버튼이 한 줄에 다 안 들어올 경우 줄바꿈 */
         }
         .choice-button {
-            background-color: #ff7f50; /* 주황색 계열 */
+            background-color: var(--button-bg);
             color: white;
             border: none;
-            border-radius: 50%; /* 원형 버튼 */
-            width: 120px;
-            height: 120px;
-            font-size: 4em; /* 이모티콘 크게 */
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 2em;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-width: 100px; /* 버튼 최소 너비 */
         }
         .choice-button:hover {
-            background-color: #ff6347; /* 약간 더 진한 주황 */
-            transform: translateY(-3px);
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px);
         }
         .choice-button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        #resultDisplay {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #34495e; /* 진한 회색 */
-            margin-bottom: 20px;
-            min-height: 2em; /* 결과 표시 영역 높이 약간 증가 */
-            white-space: pre-line; /* 여러 줄 공백 유지 */
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
         }
         #scoreDisplay {
-            font-size: 1.5em;
-            color: #555;
-            margin-bottom: 30px;
-        }
-        #resetButton {
-            padding: 12px 25px;
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            margin-bottom: 20px;
+            color: var(--primary-color);
         }
-        #resetButton:hover {
-            background-color: #0056b3;
+        #resultDisplay {
+            font-size: 1.5em;
+            min-height: 80px; /* 결과 메시지가 들어가도 레이아웃이 흔들리지 않게 최소 높이 설정 */
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+        }
+        .result-player-win {
+            color: var(--win-color);
+            font-weight: bold;
+        }
+        .result-computer-win {
+            color: var(--lose-color);
+            font-weight: bold;
+        }
+        .result-draw {
+            color: var(--draw-color);
+            font-weight: bold;
+        }
+        #messageDisplay {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #555;
+            min-height: 30px; /* 메시지가 표시될 공간 확보 */
+            margin-top: 10px;
+            animation: fadeInOut 1s ease-in-out forwards;
         }
 
-        /* 모바일 반응형 */
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #resetButton, #roundDisplay {
+            background-color: #6c757d; /* 회색 계열 */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+        #resetButton:hover, #roundDisplay:hover {
+            background-color: #5a6268;
+        }
+        #roundDisplay {
+            background-color: #007bff; /* 라운드 표시 버튼은 파란색 */
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .final-message {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: var(--primary-color);
+            animation: bounceIn 0.8s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        /* 미디어 쿼리 - 모바일 반응형 */
         @media (max-width: 600px) {
             h1 {
                 font-size: 2.2em;
@@ -99,92 +162,207 @@
                 padding: 20px;
             }
             .choice-button {
-                width: 90px;
-                height: 90px;
-                font-size: 3em;
+                font-size: 1.8em;
+                padding: 12px 20px;
+                min-width: 90px;
+            }
+            #choices {
                 gap: 15px;
             }
-            #resultDisplay {
-                font-size: 1.8em;
-            }
             #scoreDisplay {
-                font-size: 1.2em;
+                font-size: 1.5em;
             }
-            #resetButton {
-                padding: 10px 20px;
+            #resultDisplay {
                 font-size: 1.2em;
+                min-height: 70px;
+            }
+            #messageDisplay {
+                font-size: 1em;
+            }
+            #resetButton, #roundDisplay {
+                padding: 8px 15px;
+                font-size: 1em;
             }
         }
     </style>
+    <audio id="winSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+    <audio id="loseSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" preload="auto"></audio>
+    <audio id="drawSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" preload="auto"></audio>
+    <audio id="clickSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" preload="auto"></audio>
 </head>
 <body>
-    <h1>✂️ 가위바위보! ✊</h1>
+    <h1>✊✋✌️ 가위바위보 게임 🤝</h1>
     <div id="gameContainer">
+        <div id="roundDisplay"></div>
+        <div id="scoreDisplay"></div>
+        <div id="resultDisplay"></div>
+        <div id="messageDisplay">컴퓨터와 가위바위보 한판!</div>
+
         <div id="choices">
             <button class="choice-button" data-choice="rock">✊</button>
             <button class="choice-button" data-choice="paper">✋</button>
             <button class="choice-button" data-choice="scissors">✌️</button>
         </div>
-        <div id="resultDisplay"></div>
-        <div id="scoreDisplay">나: 0 | 컴퓨터: 0</div>
-        <button id="resetButton">다시 하기</button>
+        <button id="resetButton">다시 시작</button>
     </div>
 
     <script>
-        const choices = ['rock', 'paper', 'scissors']; // rock(바위), paper(보), scissors(가위)
+        const choiceButtons = document.querySelectorAll('.choice-button');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const resetButton = document.getElementById('resetButton');
+        const roundDisplay = document.getElementById('roundDisplay');
+
+        // 사운드 요소 가져오기
+        const winSound = document.getElementById('winSound');
+        const loseSound = document.getElementById('loseSound');
+        const drawSound = document.getElementById('drawSound');
+        const clickSound = document.getElementById('clickSound');
+
+        // 사운드 파일 경로를 실제 사용할 파일로 변경해야 합니다.
+        // 현재는 예시 링크이므로 실제 사용 시 문제가 있을 수 있습니다.
+
+        let playerScore = 0;
+        let computerScore = 0;
+        const choices = ['rock', 'paper', 'scissors'];
         const choiceEmojis = {
             'rock': '✊',
             'paper': '✋',
             'scissors': '✌️'
         };
-        
-        let playerScore = 0;
-        let computerScore = 0;
+        const maxRounds = 3; // N판 N선승제 (예: 3판 2선승제. 먼저 2승하면 승리)
+        const targetWins = 2; // 목표 승리 횟수 (예: 2승)
+        let currentRound = 0;
+        let gameEnded = false;
 
-        const choiceButtons = document.querySelectorAll('.choice-button');
-        const resultDisplay = document.getElementById('resultDisplay');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const resetButton = document.getElementById('resetButton');
+        // 게임 초기화
+        function initializeGame() {
+            playerScore = 0;
+            computerScore = 0;
+            currentRound = 0;
+            gameEnded = false;
+            updateScore();
+            updateRoundDisplay();
+            resultDisplay.textContent = '가위바위보!';
+            resultDisplay.className = '';
+            messageDisplay.textContent = '컴퓨터와 가위바위보 한판!';
+            messageDisplay.className = '';
+            choiceButtons.forEach(button => button.disabled = false); // 버튼 활성화
+            resetButton.textContent = '다시 시작';
+        }
 
+        // 점수 및 라운드 표시 업데이트
         function updateScore() {
             scoreDisplay.textContent = `나: ${playerScore} | 컴퓨터: ${computerScore}`;
         }
 
+        function updateRoundDisplay() {
+             roundDisplay.textContent = `라운드: ${currentRound} / ${maxRounds} (먼저 ${targetWins}승)` ;
+        }
+
+        // 승자 결정 로직
         function determineWinner(playerChoice, computerChoice) {
             if (playerChoice === computerChoice) {
-                return 'draw'; // 비김
+                return 'draw';
             } else if (
                 (playerChoice === 'rock' && computerChoice === 'scissors') ||
                 (playerChoice === 'paper' && computerChoice === 'rock') ||
                 (playerChoice === 'scissors' && computerChoice === 'paper')
             ) {
-                return 'player'; // 플레이어 승리
+                return 'player';
             } else {
-                return 'computer'; // 컴퓨터 승리
+                return 'computer';
             }
         }
 
+        // 게임 플레이
         function playGame(playerChoice) {
-            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
-            const winner = determineWinner(playerChoice, computerChoice);
+            if (gameEnded) return; // 게임이 종료되었으면 더 이상 진행하지 않음
 
-            // 결과 텍스트를 줄바꿈하여 생성
-            let resultText = `나 ${choiceEmojis[playerChoice]} vs ${choiceEmojis[computerChoice]} 컴퓨터 `;
+            clickSound.play(); // 버튼 클릭 사운드
 
-            if (winner === 'player') {
-                resultText += '<br>➡️ 내가 이겼어요! 🎉';
-                playerScore++;
-            } else if (winner === 'computer') {
-                resultText += '<br>➡️ 컴퓨터가 이겼어요! 😢';
-                computerScore++;
-            } else {
-                resultText += '<br>➡️ 비겼어요! 🤝';
-            }
+            // 플레이어 버튼 비활성화 (결과 나올 때까지)
+            choiceButtons.forEach(button => button.disabled = true);
+            
+            messageDisplay.textContent = '컴퓨터 선택 중... ⏳';
+            messageDisplay.className = ''; // 애니메이션 다시 시작
+            resultDisplay.textContent = ''; // 이전 결과 지우기
+            resultDisplay.className = ''; // 이전 결과 클래스 지우기
 
-            resultDisplay.innerHTML = resultText; // innerHTML을 사용하여 <br> 태그 적용
-            updateScore();
+            setTimeout(() => { // 딜레이 후 컴퓨터 선택 및 결과 표시
+                const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+                const winner = determineWinner(playerChoice, computerChoice);
+
+                let resultText = `나 ${choiceEmojis[playerChoice]} vs ${choiceEmojis[computerChoice]} 컴퓨터 `;
+                let resultClass = '';
+
+                if (winner === 'player') {
+                    resultText += '<br>➡️ 내가 이겼어요! 🎉';
+                    playerScore++;
+                    winSound.play(); // 승리 사운드
+                    resultClass = 'result-player-win';
+                } else if (winner === 'computer') {
+                    resultText += '<br>➡️ 컴퓨터가 이겼어요! 😢';
+                    computerScore++;
+                    loseSound.play(); // 패배 사운드
+                    resultClass = 'result-computer-win';
+                } else {
+                    resultText += '<br>➡️ 비겼어요! 🤝';
+                    drawSound.play(); // 무승부 사운드
+                    resultClass = 'result-draw';
+                }
+
+                currentRound++; // 라운드 증가
+
+                resultDisplay.innerHTML = resultText;
+                resultDisplay.className = resultClass; // 클래스 추가로 색상 변경
+                updateScore();
+                updateRoundDisplay();
+                messageDisplay.textContent = ''; // '컴퓨터 선택 중...' 메시지 제거
+                choiceButtons.forEach(button => button.disabled = false); // 버튼 다시 활성화
+
+                // N판 Y선승제 로직
+                if (playerScore >= targetWins) {
+                    endGame('player');
+                } else if (computerScore >= targetWins) {
+                    endGame('computer');
+                } else if (currentRound >= maxRounds) {
+                    // 모든 라운드가 끝났는데도 승자가 결정되지 않았다면 (예: 2판 2승제인데 1승 1패 비김)
+                    if (playerScore > computerScore) {
+                        endGame('player');
+                    } else if (computerScore > playerScore) {
+                        endGame('computer');
+                    } else {
+                        endGame('draw'); // 무승부로 최종 종료
+                    }
+                }
+
+            }, 1000); // 1초 딜레이
         }
 
+        // 게임 최종 종료 및 결과 표시
+        function endGame(finalWinner) {
+            gameEnded = true;
+            let finalMessage = '';
+            if (finalWinner === 'player') {
+                finalMessage = `⭐ 최종 승리! ⭐ ${playerScore} 대 ${computerScore}`;
+                winSound.play(); // 최종 승리 사운드
+            } else if (finalWinner === 'computer') {
+                finalMessage = `😭 최종 패배! 😭 ${playerScore} 대 ${computerScore}`;
+                loseSound.play(); // 최종 패배 사운드
+            } else {
+                finalMessage = `🤝 최종 무승부! 🤝 ${playerScore} 대 ${computerScore}`;
+                drawSound.play(); // 최종 무승부 사운드
+            }
+            
+            messageDisplay.innerHTML = `<div class="final-message">${finalMessage}</div>`;
+            choiceButtons.forEach(button => button.disabled = true); // 모든 버튼 비활성화
+            resetButton.textContent = '새 게임 시작'; // 버튼 텍스트 변경
+        }
+
+
+        // 이벤트 리스너
         choiceButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const playerChoice = button.dataset.choice;
@@ -192,16 +370,10 @@
             });
         });
 
-        resetButton.addEventListener('click', () => {
-            playerScore = 0;
-            computerScore = 0;
-            updateScore();
-            resultDisplay.textContent = '가위바위보!';
-        });
+        resetButton.addEventListener('click', initializeGame);
 
-        // 초기 점수 표시
-        updateScore();
-        resultDisplay.textContent = '가위바위보!';
+        // 초기 설정
+        initializeGame();
     </script>
 </body>
 </html>
