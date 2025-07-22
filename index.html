@@ -3,246 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐋 이서수영장 고래반 수영 코스 🐋</title>
+    <title>KY YH를 위한 게임</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f8ff; /* 연한 하늘색 배경 */
-            color: #333;
-            line-height: 1.6;
-        }
-        header {
-            background-color: #007bff; /* 파란색 헤더 */
-            color: white;
-            padding: 20px 0;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        header h1 {
+            background: #e6f2ff;
             margin: 0;
-            font-size: 2.2em;
-            letter-spacing: 1px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        h2 {
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.8em;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-        }
-        .course-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 반응형 그리드 */
-            gap: 20px;
-            list-style: none;
-            padding: 0;
-        }
-        .course-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 10px; /* 패딩 줄여서 공간 확보 */
             display: flex;
             flex-direction: column;
-            text-decoration: none;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
             color: #333;
         }
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px; /* 마진 줄여서 공간 확보 */
+            font-size: 2.8em; /* 큰 타이틀 유지 */
         }
-        .course-card-content {
-            padding: 20px;
-            flex-grow: 1;
+        .game-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* 버튼 간격 줄여서 공간 확보 */
+            width: 90%; /* 가로 너비 증가 */
+            max-width: 400px; /* 최대 너비 제한 (모바일에서 적절) */
+            flex-grow: 1; /* 남은 공간을 채우도록 성장 */
+            justify-content: center; /* 세로 중앙 정렬 */
         }
-        .course-card h3 {
-            color: #0056b3;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.4em;
-        }
-        .course-card p {
-            margin-bottom: 5px;
-            font-size: 0.95em;
-        }
-        .course-card strong {
-            color: #004085;
-        }
-        .course-type-tag {
-            display: inline-block;
+        .game-button {
+            display: block;
+            padding: 18px; /* 패딩 줄여서 버튼 높이 감소 */
             background-color: #007bff;
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.85em;
-            margin-top: 10px;
+            text-decoration: none;
+            font-size: 2em; /* 폰트 크기 조정 */
             font-weight: bold;
+            border-radius: 12px; /* 둥근 모서리 유지 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* 그림자 조정 */
         }
-        .course-type-tag.fins {
-            background-color: #28a745; /* 오리발은 다른 색상 */
+        .game-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px); /* 호버 시 약간 위로 */
         }
-        .course-goal {
-            font-size: 0.9em;
-            color: #555;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            background-color: #007bff;
-            color: white;
-            font-size: 0.9em;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+        .game-button:active {
+            transform: translateY(0); /* 클릭 시 원위치 */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
 
-        /* 모바일 최적화 */
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.5em; /* 폰트 크기를 더 작게 조정하여 한 줄 표시 유도 */
-                /* white-space: nowrap; /* 필요시 사용 (텍스트가 넘치면 잘림) */
-                /* overflow: hidden; */
-                /* text-overflow: ellipsis; */
+        /* 모바일 반응형 - 한 화면에 보이도록 최적화 */
+        @media (max-width: 600px) {
+            body {
+                padding: 5px; /* 모바일 패딩 더 줄임 */
+                justify-content: flex-start; /* 상단에서 시작하여 전체 화면 활용 */
             }
-            .container {
-                padding: 10px;
+            h1 {
+                font-size: 2em; /* 모바일 타이틀 크기 조정 */
+                margin-bottom: 15px; /* 모바일 마진 조정 */
             }
-            h2 {
-                font-size: 1.5em;
-                margin-bottom: 20px;
-                padding-bottom: 8px;
+            .game-selection {
+                width: 95%; /* 모바일에서 더 넓게 */
+                gap: 10px; /* 모바일 버튼 간격 더 줄임 */
+                padding-bottom: 10px; /* 하단 패딩 추가 */
             }
-            section:nth-of-type(2) {
-                margin-top: 30px !important;
-            }
-            .course-list {
-                grid-template-columns: 1fr;
-            }
-            .course-card-content {
-                padding: 15px;
-            }
-            .course-card h3 {
-                font-size: 1.2em;
-            }
-            .course-card p {
-                font-size: 0.9em;
+            .game-button {
+                font-size: 1.5em; /* 모바일 폰트 크기 조정 */
+                padding: 15px; /* 모바일 패딩 조정 */
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>🐋 이서수영장 고래반 수영 코스 목록 🐋</h1>
-    </header>
-
-    <div class="container">
-        <section>
-            <h2>일반 경영 코스</h2>
-            <ul class="course-list" id="generalCourses">
-                </ul>
-        </section>
-
-        <section style="margin-top: 40px;">
-            <h2>오리발/경영 코스</h2>
-            <ul class="course-list" id="finsCourses">
-                </ul>
-        </section>
+    <h1>🎮 KY YH를 위한 게임 🚀</h1>
+    <div class="game-selection">
+        <a href="rocket_launch.html" class="game-button">🚀 로켓 발사 챌린지</a>
+        <a href="target_practice.html" class="game-button">🎯 과녁 맞추기 게임</a>
+        <a href="timer_challenge.html" class="game-button">⏱️ 타이머 챌린지</a>
+        <a href="reaction_test.html" class="game-button">⚡ 반응 속도 테스트</a>
+        <a href="whac_a_mole.html" class="game-button">💥 두더지 잡기</a>
+        <a href="rps_game.html" class="game-button">✂️ 가위바위보</a>
+        <a href="number_guessing.html" class="game-button">❓ 숫자 맞추기 게임</a>
+        <a href="tetris_game.html" class="game-button">👾 테트리스</a>
     </div>
-
-    <footer>
-        <p>&copy; 2025 고래반 수영 클럽. 모든 권리 보유.</p>
-        <p>이서수영장 고래반과 함께 즐거운 수영 생활을!</p>
-    </footer>
-
-    <script>
-        const coursesData = [
-            // 일반 경영 코스
-            { type: "일반 경영", number: 1, distance: "1,200m", file: "course_s_1.html", goal: "영법 완성 및 지구력 향상" },
-            { type: "일반 경영", number: 2, distance: "1,350m", file: "course_s_2.html", goal: "지구력 및 기술 향상" },
-            { type: "일반 경영", number: 3, distance: "850m", file: "course_s_3.html", goal: "IM 및 기본기 강화" },
-            { type: "일반 경영", number: 4, distance: "950m", file: "course_s_4.html", goal: "영법별 균형 훈련" },
-            { type: "일반 경영", number: 5, "distance": "1,400m", file: "course_s_5.html", "goal": "스피드 및 유산소 지구력" },
-            { type: "일반 경영", number: 6, distance: "1,150m", file: "course_s_6.html", goal: "전신 조화 및 지구력" },
-            { type: "일반 경영", number: 7, distance: "1,000m", file: "course_s_7.html", goal: "다양한 영법 숙달" },
-            { type: "일반 경영", number: 8, distance: "1,000m", file: "course_s_8.html", goal: "자세 교정 및 효율 증대" },
-            { type: "일반 경영", number: 9, distance: "850m", file: "course_s_9.html", goal: "영법 연계 및 효율성 증진" },
-            { type: "일반 경영", number: 10, distance: "850m", file: "course_s_10.html", goal: "영법 연결 및 효율성 증진" },
-
-            // 오리발/경영 코스
-            { type: "오리발/경영", number: 1, distance: "2,000m", file: "course_f_1.html", goal: "전신 근력 및 지구력 향상" },
-            { type: "오리발/경영", number: 2, distance: "1,250m", file: "course_f_2.html", goal: "접영 기술 및 지구력" },
-            { type: "오리발/경영", number: 3, distance: "1,250m", file: "course_f_3.html", goal: "IM 능력 향상" },
-            { type: "오리발/경영", number: 4, distance: "1,050m", file: "course_f_4.html", goal: "영법 기술 및 지구력" },
-            { type: "오리발/경영", number: 5, distance: "1,200m", file: "course_f_5.html", goal: "스피드 및 유산소 지구력" },
-            { type: "오리발/경영", number: 6, distance: "1,300m", file: "course_f_6.html", goal: "복합 영법 및 지구력" }
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const generalCoursesList = document.getElementById('generalCourses');
-            const finsCoursesList = document.getElementById('finsCourses');
-
-            coursesData.forEach(course => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                
-                // 파일 경로 수정: 코스 유형에 따라 다른 폴더 지정
-                if (course.type === "일반 경영") {
-                    a.href = `Swim_Courses/${course.file}`;
-                } else if (course.type === "오리발/경영") {
-                    a.href = `Fins_Swim_Courses/${course.file}`;
-                }
-                
-                a.classList.add('course-card');
-
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('course-card-content');
-
-                const title = document.createElement('h3');
-                title.textContent = `고래반 운동 #${course.number}`;
-
-                const typeP = document.createElement('p');
-                const typeSpan = document.createElement('span');
-                typeSpan.classList.add('course-type-tag');
-                if (course.type.includes('오리발')) {
-                    typeSpan.classList.add('fins');
-                }
-                typeSpan.textContent = course.type;
-                typeP.appendChild(typeSpan);
-
-                const goalP = document.createElement('p');
-                goalP.classList.add('course-goal');
-                goalP.innerHTML = `<strong>목표:</strong> ${course.goal}`;
-
-                const distanceP = document.createElement('p');
-                distanceP.innerHTML = `<strong>총 거리:</strong> ${course.distance}`;
-
-                contentDiv.appendChild(title);
-                contentDiv.appendChild(typeP);
-                contentDiv.appendChild(goalP);
-                contentDiv.appendChild(distanceP);
-                a.appendChild(contentDiv);
-                li.appendChild(a);
-
-                if (course.type === "일반 경영") {
-                    generalCoursesList.appendChild(li);
-                } else if (course.type === "오리발/경영") {
-                    finsCoursesList.appendChild(li);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
